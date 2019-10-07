@@ -1,8 +1,8 @@
 JSON = require 'json'
 file = require 'files'
 bidlist = {
-    {item='rhodium ore', stack='single', minimum=100, maximum=300, price_inc=10, quantity},
-    {item='ifritite', stack='single', minimum=1000, maximum=2000, price_inc=100, quantity=10},
+    {item='rhodium ore', stack='single', minimum=10, maximum=30, price_inc=10, quantity}, -- unlimited quantity
+    {item='ifritite', stack='single', minimum=1, maximum=2, price_inc=1, quantity=10},
 }
 default.camper = {
     min_cycle_delay = 60,
