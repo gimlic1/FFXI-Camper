@@ -45,7 +45,10 @@ end
 
 windower.register_event('incoming chunk', function(id, original, modified, injected, blocked)
     if id == 0x04C then
-        if original:byte(5) == 0x0E and actions and type(actions) == 'table' and bidding then
+        local pType = original:byte(5)
+        if pType == 0x03 and actions then
+            killCycle()
+        elseif pType == 0x0E and actions and type(actions) == 'table' and bidding then
             if original:byte(7) == 1 then
                 bidding = false
                 if bidlist[actions.Ind].quantity then
