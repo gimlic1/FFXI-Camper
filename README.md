@@ -1,4 +1,4 @@
-Place camper.lua and JSON.lua inside auctionhelper addon folder and add `require('camper')` near the top of auctionhelper.lua
+Place camper.lua and JSON.lua inside auctionhelper addon folder and add `require('camper')` near the top of auctionhelper.lua [this line here](https://github.com/Ivaar/Windower-addons/blob/72e7144bbe4513458469375da909bc9de006f676/AuctionHelper/AuctionHelper.lua#L27)
 
 //camp on 	-- turn on camping mode
 
