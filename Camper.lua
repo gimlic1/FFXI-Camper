@@ -1,8 +1,12 @@
 JSON = require 'json'
 file = require 'files'
+
+currentbid = nil
+
 bidlist = {
     {item='rhodium ore', stack='single', minimum=10, maximum=30, price_inc=10, quantity}, -- unlimited quantity
     {item='ifritite', stack='single', minimum=1, maximum=2, price_inc=1, quantity=10},
+
 }
 default.camper = {
     min_cycle_delay = 60,
@@ -15,11 +19,13 @@ default.camper = {
 
 function nextBid()
     actions.tempEntry = nil
+	currentbid = nil-- reset new variable
     if bidlist[actions.Ind+1] then
         actions.Ind = actions.Ind + 1
         resumeCycle(settings.camper.min_bid_delay,settings.camper.max_bid_delay)
     else
-        resumeCycle(settings.camper.min_cycle_delay,settings.camper.max_cycle_delay)
+        actions.Ind = 1--added line to restart the list after you get to end.
+		resumeCycle(settings.camper.min_cycle_delay,settings.camper.max_cycle_delay)
     end
 end
 
@@ -27,9 +33,10 @@ function autoBid()
     if bidlist[actions.Ind] and not bidding then
         if not bidlist[actions.Ind].quantity or tonumber(bidlist[actions.Ind].quantity) > 0 then
             if not actions.tempEntry or actions.tempEntry.item ~= bidlist[actions.Ind].item or actions.tempEntry.stack ~= bidlist[actions.Ind].stack then actions.tempEntry = bidlist[actions.Ind] end
-            if ah_proposal('buy', actions.tempEntry.item, actions.tempEntry.stack, tostring(actions.tempEntry.minimum)) then
+			if not currentbid then currentbid =  bidlist[actions.Ind].minimum + 0 end-- initiating new variable
+            if ah_proposal('buy', actions.tempEntry.item, actions.tempEntry.stack, tostring(currentbid)) then  --adding my new variable
                 bidding = true
-                print('bid pending results %s %s':format(bidlist[actions.Ind].item,actions.tempEntry.minimum))
+                print('bid pending results %s %s':format(bidlist[actions.Ind].item,currentbid))-- added the current bid variable
             else
                 table.remove(bidlist[actions.Ind])
                 actions.Ind = actions.Ind - 1
@@ -57,8 +64,8 @@ windower.register_event('incoming chunk', function(id, original, modified, injec
                 resumeCycle(settings.camper.min_bid_delay,settings.camper.max_bid_delay)
             elseif original:byte(7) == 0xC5 then
                 bidding = false
-                if actions.tempEntry.minimum+bidlist[actions.Ind].price_inc <= bidlist[actions.Ind].maximum then
-                    actions.tempEntry.minimum = actions.tempEntry.minimum+bidlist[actions.Ind].price_inc
+                if currentbid+bidlist[actions.Ind].price_inc <= bidlist[actions.Ind].maximum then
+                    currentbid = currentbid+bidlist[actions.Ind].price_inc-- changed to new variable
                     resumeCycle(settings.camper.min_bid_delay,settings.camper.max_bid_delay)
                 else
                     nextBid()
