@@ -6,7 +6,7 @@ currentbid = nil
 --display:hide()
 
 bidlist = {
-    {item='rhodium ore', stack='single', minimum=10, maximum=30, price_inc=10, quantity}, -- unlimited quantity
+    {item='rhodium ore', stack='single', minimum=10, maximum=30, price_inc=10, quantity=nil}, -- unlimited quantity -- [2026-11-22 Fix] Was: ,quantity}
     {item='ifritite', stack='single', minimum=1, maximum=2, price_inc=1, quantity=10},
 
 }
@@ -40,7 +40,7 @@ function autoBid()
                 bidding = true
                 print('bid pending results %s %s':format(bidlist[actions.Ind].item,currentbid))-- added the current bid variable
             else
-                table.remove(bidlist[actions.Ind])
+                table.remove(bidlist, actions.Ind) -- [2026-11-22 Fix] Was: table.remove(bidlist[actions.Ind])
                 actions.Ind = actions.Ind - 1
                 nextBid()
             end
@@ -63,7 +63,7 @@ windower.register_event('incoming chunk', function(id, original, modified, injec
                 if bidlist[actions.Ind].quantity then
                     bidlist[actions.Ind].quantity = bidlist[actions.Ind].quantity - 1
 					if tonumber(bidlist[actions.Ind].quantity) == 0 then
-						table.remove(bidlist[actions.Ind])
+						table.remove(bidlist, actions.Ind) -- [2026-11-22 Fix] Was: table.remove(bidlist[actions.Ind])
 						actions.Ind = actions.Ind - 1
 						if display then
 							display:text(display_bidlist())
@@ -96,7 +96,7 @@ windower.register_event('outgoing chunk', function(id, original, modified, injec
             local item = res_items[packet.Item].en
             local entry = foundEntry(item:lower(),stack)
             if not entry then
-                bidlist[#bidlist+1] = {item=item,minimum=packet.Price,maximum=packet.Price,stack=stack,price_inc=1,quantity}
+                bidlist[#bidlist+1] = {item=item,minimum=packet.Price,maximum=packet.Price,stack=stack,price_inc=1,quantity=nil} -- [2026-11-22 Fix] Was: ,quantity}
                 print('Added "%s" %s [%s]':format(item, comma_value(packet.Price), (stack == 1 and 'STACK' or stack == 0 and 'SINGLE' or stack:upper())))
            elseif packet.Price > bidlist[entry].maximum then
                 bidlist[entry].price_inc = packet.Price - bidlist[entry].maximum
@@ -156,13 +156,14 @@ function display_bidlist()
 end
 
 function profile(item,stack,max,min,inc,qty) 
-    item = get_item_res(table.concat(commands,' ',3,#commands-3))
+    local item_res = get_item_res(item) -- [2026-11-22 Fix] Was: item = get_item_res(table.concat(commands,' ',3,#commands-3))
     max = format_price(max)
     min = format_price(min)
     inc = format_price(inc)
-    if item and stack and max and min and inc and qty then
-        print('Added Quantity %s. "%s" %s [%s]':format(commands[#commands], item.en, comma_value(price), (vol == 1 and 'STACK' or vol == 0 and 'SINGLE' or vol:upper())))
-        bidlist[#bidlist+1] = {item=item.en,minimum=min,maximum=max,stack=stack,price_inc=inc,quantity=tonumber(qty)}            
+    if item_res and stack and max and min and inc and qty then
+        -- [2026-11-22 Fix] Was: print('Added Quantity %s. "%s" %s [%s]':format(commands[#commands], item.en, comma_value(price), (vol == 1 and 'STACK' or vol == 0 and 'SINGLE' or vol:upper())))
+        print('Added Quantity %s. "%s" %s [%s]':format(tostring(qty), item_res.en, comma_value(max), (stack == 1 and 'STACK' or stack == 0 and 'SINGLE' or tostring(stack):upper())))
+        bidlist[#bidlist+1] = {item=item_res.en,minimum=min,maximum=max,stack=stack,price_inc=inc,quantity=tonumber(qty)}            
     else
         return false
     end
@@ -175,7 +176,7 @@ end
 windower.register_event('unhandled command', function(...)
     local commands = {...}
     if not commands[1] or commands[1]:lower() ~= 'camp' then return end
-    commands[2] = commands[2]:lower()
+    commands[2] = commands[2] and commands[2]:lower() -- [2026-11-22 Fix] Was: commands[2] = commands[2]:lower()
     if not commands[2] then
         
     elseif commands[2] == 'on' then
@@ -214,7 +215,7 @@ windower.register_event('unhandled command', function(...)
     elseif commands[2] == 'remove' then
     elseif commands[2] == 'clear' then
         bidlist = {}
-        display:text(display_bidlist())
+        if display then display:text(display_bidlist()) end -- [2026-11-22 Fix] Was: display:text(display_bidlist())
     elseif commands[2] == 'rec' and commands[3] and not actions then
         if commands[3] == 'on' then
             record = true
@@ -223,10 +224,10 @@ windower.register_event('unhandled command', function(...)
         end
     elseif commands[2] == 'qty' and tonumber(commands[3]) then
         bidlist[#bidlist].quantity = tonumber(commands[3])
-        display:text(display_bidlist())
+        if display then display:text(display_bidlist()) end -- [2026-11-22 Fix] Was: display:text(display_bidlist())
     elseif commands[2] == 'inc' and tonumber(commands[3]) then
         bidlist[#bidlist].price_inc = tonumber(commands[3])
-        display:text(display_bidlist())
+        if display then display:text(display_bidlist()) end -- [2026-11-22 Fix] Was: display:text(display_bidlist())
     elseif commands[2] == 'import' then
         if commands[3] then
             local import = file.read('/data/'..table.concat(commands,' ',3)..'.json')
