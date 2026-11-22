@@ -2,6 +2,8 @@ JSON = require 'json'
 file = require 'files'
 
 currentbid = nil
+--display = texts.new(display_bidlist(), settings.camper.display)
+--display:hide()
 
 bidlist = {
     {item='rhodium ore', stack='single', minimum=10, maximum=30, price_inc=10, quantity}, -- unlimited quantity
@@ -60,6 +62,17 @@ windower.register_event('incoming chunk', function(id, original, modified, injec
                 bidding = false
                 if bidlist[actions.Ind].quantity then
                     bidlist[actions.Ind].quantity = bidlist[actions.Ind].quantity - 1
+					if tonumber(bidlist[actions.Ind].quantity) == 0 then
+						table.remove(bidlist[actions.Ind])
+						actions.Ind = actions.Ind - 1
+						if display then
+							display:text(display_bidlist())
+						end
+						nextBid()
+					end
+					if display then
+						display:text(display_bidlist())
+					end
                 end
                 resumeCycle(settings.camper.min_bid_delay,settings.camper.max_bid_delay)
             elseif original:byte(7) == 0xC5 then
@@ -173,6 +186,7 @@ windower.register_event('unhandled command', function(...)
             elseif tonumber(commands[3]) then
                 actions = {Ind=tonumber(commands[3])}
             end
+			currentbid = nil
             autoBid()
         end
     elseif commands[2] == 'off' then
@@ -226,7 +240,9 @@ windower.register_event('unhandled command', function(...)
                     print('Camper Error: %s is not a valid item name':format(v))
                 end
             end
-            display:text(display_bidlist())
+			if display then
+				display:text(display_bidlist())
+			end
         end
     elseif commands[2] == 'export' then
         if commands[3] then
