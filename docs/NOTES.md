@@ -37,7 +37,7 @@ Automated Auction House bid-camping module designed to run inside `AuctionHelper
 
 ## Local Settings & Customizations
 - Standalone `C:\Windower\addons\Camper\Camper.lua` is the unmodified upstream gist (`min_cycle_delay=60`, `max_cycle_delay=180`, sample `rhodium ore`/`ifritite`).
-- Kevin's active modified copy lives at `C:\Windower\addons\AuctionHelper\Camper.lua` (`min_cycle_delay=180`, `max_cycle_delay=360`, hardcoded `Colibri Beak` and `Garglle. Shank`, and extra `display:show()` calls).
+- Gimlic's active modified copy lives at `C:\Windower\addons\AuctionHelper\Camper.lua` (`min_cycle_delay=180`, `max_cycle_delay=360`, hardcoded `Colibri Beak` and `Garglle. Shank`, and extra `display:show()` calls).
 
 ## Related Notes
 - `FFXI Addon — AuctionHelper`
